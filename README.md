@@ -1,3 +1,5 @@
 # Skills
 
-- **brainstorming**: 从 [obra/superpowers](https://github.com/obra/superpowers) 复刻，改为主动触发并去掉了后续的编写计划环节。
+- **brainstorming**: 从 `obra/superpowers` 复刻，改为手动触发，去掉 Visual Companion。
+- **writing-plans**: 从 `obra/superpowers` 复刻，计划文档保存到 `docs/plans/`，去掉外部 superpowers 依赖。
+- **executing-plans**: 从 `obra/superpowers` 复刻，执行计划并本地收尾，去掉外部 superpowers 依赖。

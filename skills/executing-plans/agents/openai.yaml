@@ -1,0 +1,4 @@
+interface:
+  display_name: "Executing Plans"
+  short_description: "Execute written implementation plans step by step"
+  default_prompt: "Use $executing-plans to execute this implementation plan."
