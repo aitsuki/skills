@@ -1,0 +1,7 @@
+interface:
+  display_name: "Finishing a Development Branch"
+  short_description: "Safely consolidate commits and finish a branch"
+  default_prompt: "Use $finishing-a-development-branch to safely finish this development branch."
+
+policy:
+  allow_implicit_invocation: false

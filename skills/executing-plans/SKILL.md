@@ -19,7 +19,17 @@ Load plan, review critically, execute all tasks, report when complete.
 3. If concerns: Raise them with your human partner before starting
 4. If no concerns: Create todos for the plan items and proceed
 
-Before starting implementation, report the current branch and working tree status.
+Before starting implementation, report the current branch and working tree
+status. Confirm the spec and plan commits are already in history, then run:
+
+```bash
+git rev-parse HEAD
+```
+
+Record the result as `implementation-base` immediately before the first
+implementation task. Do not move this boundary later. The implementation range
+passed to the finishing skill is `implementation-base..HEAD`, keeping the
+committed spec and plan outside the rewrite range.
 
 ### Step 2: Execute Tasks
 
@@ -32,10 +42,13 @@ For each task:
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
-1. Run the plan-specified final verification if present; otherwise run the relevant full test suite and report that no final verification was specified
-2. Check `git status`
-3. Summarize changes, tests, and remaining risks
-4. Report when complete
+- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
+- **REQUIRED SUB-SKILL:** Use `$finishing-a-development-branch`
+- Pass the recorded `implementation-base`
+- Follow that skill to verify tests, handle implementation commits, present
+  integration options, and execute the user's choice
+
+Do not rewrite implementation commits inside this skill.
 
 ## When to Stop and Ask for Help
 
@@ -57,8 +70,9 @@ After all tasks complete and verified:
 
 ## Remember
 - Review plan critically first
-- Report current branch and working tree status before implementation
 - Follow plan steps exactly
 - Don't skip verifications
 - Reference available skills when plan says to
 - Stop when blocked, don't guess
+- Record `implementation-base` immediately before implementation
+- Leave commit rewriting to `$finishing-a-development-branch`

@@ -12,7 +12,8 @@
 
 - 设计文档和实施计划提交必须位于 `implementation-base` 之前，不得进入实施提交整理范围。
 - 只有工作区和暂存区干净时才允许重写历史。
-- 禁止在 `main`、`master` 等受保护主分支上重写历史。
+- `main`、`master` 等主分支名称本身不阻止重写；只要候选提交已被证明尚未发布且其他
+  安全门通过，就允许整理。
 - 无法刷新远端引用或无法证明候选提交尚未推送时，必须拒绝重写。
 - 单提交和多语义提交两种整理模式都必须先创建并验证备份分支。
 - 备份分支命名为 `backup/<current-branch>-before-finish-<YYYYMMDD-HHMMSS>`，任何路径都不得自动删除它。
@@ -30,7 +31,7 @@
 
 **Interfaces:**
 - Consumes: `implementation-base`（由 `executing-plans` 传入）或手动调用时经用户确认的候选基准。
-- Produces: 三种提交处理路径、安全备份和验证结果，以及本地合并、创建 PR、保留分支三种后续处置选择。
+- Produces: 根据提交数量和分析结果动态生成的提交处理路径、安全备份和验证结果，以及本地合并、创建 PR、保留分支三种后续处置选择。
 
 - [ ] **Step 1: 写出结构检查并确认当前失败**
 
@@ -45,7 +46,8 @@ $required = @(
   "backup/<current-branch>-before-finish-<YYYYMMDD-HHMMSS>",
   "Keep existing commits",
   "Consolidate into one commit",
-  "Reorganize into semantic commits",
+  "contains exactly one commit",
+  "Apply the semantic commit plan shown above",
   "git reset --hard <backup-branch>"
 )
 $text = if (Test-Path $path) { Get-Content -Raw $path } else { "" }
@@ -95,8 +97,8 @@ continuing. Never rewrite from an inferred boundary without approval.
 
 1. Run the implementation test suite. Stop if it fails.
 2. Run `git status --short`. Stop unless the working tree and index are clean.
-3. Determine the current branch. Stop on `main`, `master`, or another protected
-   primary branch.
+3. Determine the current branch. Branch names such as `main` or `master` do not
+   block rewriting; publication status is the safety boundary.
 4. Verify the base is an ancestor of `HEAD`.
 5. Run `git fetch --all --prune`. If remote references cannot be refreshed,
    stop because unpublished status cannot be proved.
@@ -119,16 +121,19 @@ git branch -r --contains <commit>
 If the eligible range is empty, skip commit consolidation and proceed to
 branch disposition.
 
-## Step 2: Choose Commit Handling
+## Step 2: Analyze Commits and Build Dynamic Options
 
-Show the confirmed eligible range and ask the user to choose:
+If the eligible range contains exactly one commit, report that consolidation
+is unnecessary and proceed directly to branch disposition without asking a
+commit-handling question.
 
-1. **Keep existing commits**
-2. **Consolidate into one commit**
-3. **Reorganize into semantic commits**
+For multiple commits, analyze purpose, files, diff, tests, and dependencies
+before asking the user. If no useful semantic grouping exists, show only
+**Keep existing commits** and **Consolidate into one commit**. If a useful
+grouping exists, first display the complete proposal from Step 3B, then add
+**Apply the semantic commit plan shown above** as the third option.
 
-Keeping existing commits does not create a backup and does not rewrite
-history. Proceed directly to branch disposition.
+Never ask the user whether the Agent should plan a grouping later.
 
 ## Step 3A: Propose One Commit
 
@@ -155,9 +160,9 @@ For every proposed commit show:
 - concise change summary;
 - ordering or dependency rationale where needed.
 
-Show the complete ordered proposal and obtain explicit user approval. Revise
-the proposal when requested. Do not rewrite until the complete grouping is
-approved.
+Show the complete ordered proposal before the options. If the user chooses it,
+obtain explicit approval of the final grouping. Revise the proposal when
+requested. Do not rewrite until the complete grouping is approved.
 
 ## Step 4: Record State and Create the Backup
 
@@ -264,6 +269,11 @@ confirm it, then choose:
 2. Push the branch and create a pull request.
 3. Keep the branch as-is.
 
+If the current branch is already the confirmed target branch, do not offer a
+local merge or pull-request-from-the-same-branch option. Report that the changes
+are already on the target branch, then offer only applicable actions such as
+pushing or keeping the branch local.
+
 For a local merge:
 
 ```bash
@@ -310,8 +320,9 @@ Do not run the cleanup command.
 ## Safety Rules
 
 - Never rewrite a dirty working tree.
-- Never rewrite a protected primary branch.
 - Never rewrite commits whose unpublished status cannot be proved.
+- Allow rewriting on `main`, `master`, or another primary branch when every
+  eligible commit is proven unpublished and all other safety checks pass.
 - Never include commits before the confirmed implementation base.
 - Never create a backup for the keep-existing-commits path.
 - Always create and verify a backup before either rewrite mode.
@@ -333,7 +344,8 @@ $required = @(
   "backup/<current-branch>-before-finish-<YYYYMMDD-HHMMSS>",
   "Keep existing commits",
   "Consolidate into one commit",
-  "Reorganize into semantic commits",
+  "contains exactly one commit",
+  "Apply the semantic commit plan shown above",
   "git reset --hard <backup-branch>"
 )
 $text = Get-Content -Raw $path
@@ -353,7 +365,8 @@ $required = @(
   "Never delete the backup automatically",
   "Never execute the recovery command automatically",
   "Never rewrite a dirty working tree",
-  "Never rewrite a protected primary branch",
+  "publication status is the safety boundary",
+  "Allow rewriting on `main`, `master`, or another primary branch",
   "Never rewrite commits whose unpublished status cannot be proved",
   "Never rewrite before the user approves the exact proposal"
 )
@@ -583,7 +596,7 @@ if ($checks -contains $false) { exit 1 }
 
 Expected: PASS，无输出。
 
-- [ ] **Step 2: 检查三条用户路径及两条备份路径**
+- [ ] **Step 2: 检查动态用户路径及两条备份路径**
 
 Run:
 
@@ -593,7 +606,9 @@ $required = @(
   "Keep existing commits",
   "does not create a backup",
   "Consolidate into one commit",
-  "Reorganize into semantic commits",
+  "contains exactly one commit",
+  "Apply the semantic commit plan shown above",
+  "analysis and concrete proposal must already be visible",
   "For either rewrite mode",
   "Never delete the backup branch automatically"
 )
@@ -603,7 +618,7 @@ if ($missing.Count -gt 0) { $missing; exit 1 }
 
 Expected: PASS，无输出。
 
-- [ ] **Step 3: 检查远端、工作区和受保护分支安全门**
+- [ ] **Step 3: 检查远端、工作区和主分支安全规则**
 
 Run:
 
@@ -614,7 +629,8 @@ $required = @(
   "git fetch --all --prune",
   "git branch -r --contains <commit>",
   "Never rewrite a dirty working tree",
-  "Never rewrite a protected primary branch",
+  "publication status is the safety boundary",
+  "Allow rewriting on `main`, `master`, or another primary branch",
   "Never rewrite commits whose unpublished status cannot be proved"
 )
 $missing = $required | Where-Object { -not $text.Contains($_) }
