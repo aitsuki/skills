@@ -1,7 +1,7 @@
 interface:
-  display_name: "Finishing a Development Branch"
-  short_description: "Safely consolidate commits and finish a branch"
-  default_prompt: "Use $finishing-a-development-branch to safely finish this development branch."
+  display_name: "Finalizing Implementation Commits"
+  short_description: "Safely organize unpublished implementation commits"
+  default_prompt: "Use $finalizing-implementation-commits to safely finalize these local implementation commits."
 
 policy:
   allow_implicit_invocation: false
