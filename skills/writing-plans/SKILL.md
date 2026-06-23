@@ -153,7 +153,19 @@ If you find issues, fix them inline. No need to re-review - just fix and move on
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving and self-reviewing the plan, commit the plan before offering
+execution choices:
+
+```bash
+git add -- <plan-path>
+git commit -m "docs: add <feature-name> implementation plan"
+```
+
+Stage only the plan file so unrelated working-tree changes are not included.
+If the commit fails, report the failure and stop before offering execution
+choices.
+
+After the commit succeeds, offer execution choice:
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
 
