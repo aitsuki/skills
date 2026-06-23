@@ -28,7 +28,7 @@ git rev-parse HEAD
 
 Record the result as `implementation-base` immediately before the first
 implementation task. Do not move this boundary later. The implementation range
-passed to the finishing skill is `implementation-base..HEAD`, keeping the
+passed to the commit-finalization skill is `implementation-base..HEAD`, keeping the
 committed spec and plan outside the rewrite range.
 
 ### Step 2: Execute Tasks
@@ -41,14 +41,18 @@ For each task:
 
 ### Step 3: Complete Development
 
-After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use `$finishing-a-development-branch`
-- Pass the recorded `implementation-base`
-- Follow that skill to verify tests, handle implementation commits, present
-  integration options, and execute the user's choice
+After all tasks complete and verify successfully:
 
-Do not rewrite implementation commits inside this skill.
+- Announce: "I'm using the finalizing-implementation-commits skill to finalize local implementation commits."
+- **REQUIRED SUB-SKILL:** Use `$finalizing-implementation-commits`
+- Pass the recorded `implementation-base`
+- State that the eligible range is exactly `implementation-base..HEAD`
+- Follow that skill through commit analysis, any selected safe rewrite, final
+  verification, and its mandatory terminal report
+
+Do not rewrite implementation commits inside this skill. Do not push, create a
+PR, merge branches, or continue with branch disposition after the finalizing
+skill ends.
 
 ## When to Stop and Ask for Help
 
@@ -75,4 +79,5 @@ Do not rewrite implementation commits inside this skill.
 - Reference available skills when plan says to
 - Stop when blocked, don't guess
 - Record `implementation-base` immediately before implementation
-- Leave commit rewriting to `$finishing-a-development-branch`
+- Leave implementation commit rewriting to `$finalizing-implementation-commits`
+- Treat the finalizing skill's report as the terminal state; never push or continue into branch disposition

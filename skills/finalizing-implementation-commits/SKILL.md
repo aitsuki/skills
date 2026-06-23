@@ -177,8 +177,7 @@ git branch <backup-branch> "$ORIGINAL_HEAD"
 test "$(git rev-parse <backup-branch>)" = "$ORIGINAL_HEAD"
 ```
 
-If creation or verification fails, stop before rewriting. Never delete the
-backup automatically.
+If creation or verification fails, stop before rewriting. Never delete the backup automatically.
 
 ## Step 8A: Squash Into One Commit
 
