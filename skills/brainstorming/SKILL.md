@@ -27,9 +27,8 @@ You MUST create a task for each of these items and complete them in order:
 4. **Present design** — in sections scaled to their complexity, get user approval after each section
 5. **Write design doc** — save to `docs/specs/YYYY-MM-DD-<topic>-design.md`
 6. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-7. **User reviews written spec** — ask user to review the spec file before proceeding
-8. **Commit approved spec** — commit the spec file after user approval
-9. **Assess plan need** — decide whether the approved spec actually needs a written implementation plan before asking the user
+7. **User reviews written spec** — ask user to review the spec file
+8. **Commit it** - commit the spec file
 
 ## Process Flow
 
@@ -43,11 +42,7 @@ digraph brainstorming {
     "Write design doc" [shape=box];
     "Spec self-review\n(fix inline)" [shape=box];
     "User reviews spec?" [shape=diamond];
-    "Commit approved spec" [shape=box];
-    "Self-assess plan need" [shape=diamond];
-    "Ask user to confirm plan" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
-    "Stop after committed spec" [shape=doublecircle];
+    "Commit the spec file" [shape=box];
 
     "Explore project context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
@@ -58,16 +53,9 @@ digraph brainstorming {
     "Write design doc" -> "Spec self-review\n(fix inline)";
     "Spec self-review\n(fix inline)" -> "User reviews spec?";
     "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Commit approved spec" [label="approved"];
-    "Commit approved spec" -> "Self-assess plan need";
-    "Self-assess plan need" -> "Ask user to confirm plan" [label="plan recommended"];
-    "Self-assess plan need" -> "Stop after committed spec" [label="spec is enough"];
-    "Ask user to confirm plan" -> "Invoke writing-plans skill" [label="user confirms"];
-    "Ask user to confirm plan" -> "Stop after committed spec" [label="user declines"];
+    "User reviews spec?" -> "Commit the spec file" [label="approved"];
 }
 ```
-
-**The terminal state is self-assessing whether the committed spec needs a written implementation plan.** Do NOT automatically invoke writing-plans. Only ask the user about writing a plan when your assessment says a plan is warranted, and only invoke writing-plans when the user confirms.
 
 ## The Process
 
@@ -75,7 +63,7 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec and the user decides whether it needs a separate plan.
+- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec through the normal design, review, and commit flow.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
@@ -128,20 +116,11 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before we commit it."
+> "Spec written to `<path>`. Please review it and let me know if you want to make any changes before commit."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
-After the user approves the spec, commit the design document to git.
-
-**Plan Need Assessment:**
-
-- After committing the approved spec, assess whether it needs a written implementation plan.
-- Recommend a plan only when the task is large, risky, ambiguous, spans multiple modules, involves data migration or compatibility, has high failure cost, needs staged rollout, or is likely to be handed off.
-- If the spec is enough, say so briefly and stop after the committed spec unless the user has already chosen a different explicit next step.
-- If a plan is warranted, explain the concrete reason in one sentence and ask whether the user wants you to create it.
-- If the user confirms, invoke the writing-plans skill.
-- If the user declines, stop after the committed spec or follow the user's explicitly chosen next step.
+This skill ends after the approved spec has been committed. Do not proceed into implementation unless the user explicitly asks for follow-up work.
 
 ## Key Principles
 
@@ -151,3 +130,4 @@ After the user approves the spec, commit the design document to git.
 - **Explore alternatives** - Always propose 2-3 approaches before settling
 - **Incremental validation** - Present design, get approval before moving on
 - **Be flexible** - Go back and clarify when something doesn't make sense
+

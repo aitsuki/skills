@@ -1,7 +1,0 @@
-interface:
-  display_name: "Writing Plans"
-  short_description: "Turn specs into detailed implementation plans"
-  default_prompt: "Use $writing-plans to turn this spec into a detailed implementation plan."
-
-policy:
-  allow_implicit_invocation: false
